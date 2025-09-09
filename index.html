@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NeuralEngine - The AI Knowledge Core</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts: Exo 2 -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Exo+2:wght@300;400;500;600;700;900&display=swap" rel="stylesheet">
+    
+    <!-- Three.js for 4D graphics -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
+    <!-- Custom Styles and Theming -->
+    <style>
+        :root {
+            --color-primary: #00f2ff;
+            --color-secondary: #ff00f2;
+            --color-tertiary: #f2ff00;
+            --color-bg-deep: #020412;
+            --color-bg-mid: #0a0f28;
+        }
+        body {
+            font-family: 'Exo 2', sans-serif;
+            background-color: var(--color-bg-deep);
+            color: #e0e0e0;
+        }
+        #dynamic-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+        }
+        .gradient-text {
+            background: linear-gradient(90deg, var(--color-primary), var(--color-secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .glass-pane {
+            background: rgba(10, 15, 40, 0.6);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(0, 242, 255, 0.2);
+            position: relative;
+            z-index: 1;
+        }
+        .gradient-border {
+            border: 2px solid transparent;
+            background-clip: padding-box;
+            border-image: linear-gradient(45deg, var(--color-primary), var(--color-secondary)) 1;
+            transition: all 0.3s ease-in-out;
+        }
+        .gradient-border:hover {
+            transform: translateY(-5px) scale(1.02);
+            box-shadow: 0 0 25px rgba(0, 242, 255, 0.5), 0 0 40px rgba(255, 0, 242, 0.3);
+        }
+        .section-title {
+            position: relative;
+            display: inline-block;
+            text-shadow: 0 0 15px var(--color-primary);
+        }
+        .section-title::after {
+            content: '';
+            position: absolute;
+            bottom: -12px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 70%;
+            height: 4px;
+            background: linear-gradient(90deg, var(--color-primary), var(--color-secondary));
+            border-radius: 2px;
+            filter: blur(3px);
+        }
+        .section-divider {
+            position: relative;
+            height: 100px;
+            overflow: hidden;
+            margin-top: -1px;
+            margin-bottom: -1px;
+        }
+        .section-divider svg {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            height: auto;
+        }
+        /* Scroll reveal animation */
+        .reveal {
+            opacity: 0;
+            transform: translateY(50px);
+            transition: opacity 1.2s cubic-bezier(0.5, 0, 0, 1), transform 1.2s cubic-bezier(0.5, 0, 0, 1);
+        }
+        .reveal.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        /* Code block styling */
+        pre {
+            background-color: #01020a;
+            border-left: 4px solid var(--color-primary);
+            padding: 1rem;
+            border-radius: 0 8px 8px 0;
+            font-size: 0.9em;
+            overflow-x: auto;
+            color: #d0d0d0;
+        }
+        code .keyword { color: var(--color-primary); font-weight: bold; }
+        code .function { color: var(--color-secondary); }
+        code .comment { color: #6a737d; }
+        code .number { color: var(--color-tertiary); }
+    </style>
+</head>
+<body class="overflow-x-hidden">
+    <canvas id="dynamic-bg"></canvas>
+    <!-- Header -->
+    <header id="header" class="glass-pane fixed top-0 left-0 right-0 z-50 transition-all duration-300">
+        <div class="container mx-auto px-6 py-4 flex justify-between items-center">
+            <a href="#" class="text-3xl font-black text-white flex items-center">
+                <svg class="w-8 h-8 mr-2" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M12 2L2 7V17L12 22L22 17V7L12 2Z" stroke="url(#logo-gradient)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M2 7L12 12M12 22V12M22 7L12 12M17 4.5L7 9.5" stroke="url(#logo-gradient)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <defs><linearGradient id="logo-gradient" x1="2" y1="2" x2="22" y2="22"><stop offset="0%" stop-color="#00f2ff"/><stop offset="100%" stop-color="#ff00f2"/></linearGradient></defs>
+                </svg>
+                Neural<span class="gradient-text">Engine</span>
+            </a>
+            <nav class="hidden md:flex space-x-6 text-lg items-center">
+                <a href="#concepts" class="text-gray-300 hover:text-white transition">Concepts</a>
+                <a href="#anatomy" class="text-gray-300 hover:text-white transition">Anatomy</a>
+                <a href="#backpropagation" class="text-gray-300 hover:text-white transition">Training</a>
+                <a href="#llms" class="text-gray-300 hover:text-white transition">LLMs</a>
+                <a href="#branches" class="text-gray-300 hover:text-white transition">Branches</a>
+                <a href="#ethics" class="text-gray-300 hover:text-white transition">Ethics</a>
+            </nav>
+        </div>
+    </header>
+
+    <main>
+        <!-- Hero Section -->
+        <section id="hero" class="min-h-screen flex items-center pt-24 md:pt-0 relative">
+            <div class="container mx-auto px-6 z-10 grid md:grid-cols-2 gap-8 items-center">
+                <div class="text-center md:text-left">
+                    <h1 class="text-5xl md:text-7xl font-black text-white leading-tight mb-4">
+                        Deconstructing the <br class="hidden md:block" />
+                        <span class="gradient-text">Mind of Machines</span>.
+                    </h1>
+                    <p class="text-lg md:text-xl text-gray-300 mb-8 max-w-xl">
+                        An in-depth expedition into the core of Artificial Intelligence, from foundational principles to the bleeding edge of generative models.
+                    </p>
+                    <a href="#concepts" class="bg-gradient-to-r from-cyan-500 to-purple-500 hover:from-cyan-400 hover:to-purple-400 text-white font-bold py-4 px-10 rounded-lg text-lg transition-all transform hover:scale-105 inline-block shadow-lg shadow-cyan-500/30">
+                        Begin the Descent
+                    </a>
+                </div>
+                <div id="hero-canvas-container" class="w-full h-96 md:h-[600px] cursor-grab active:cursor-grabbing">
+                    <!-- 4D Canvas will be inserted here -->
+                </div>
+            </div>
+        </section>
+
+        <!-- Section Divider -->
+        <div class="section-divider">
+            <svg viewBox="0 0 1440 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M0 50L60 55C120 60 240 70 360 70C480 70 600 60 720 55C840 50 960 50 1080 55C1200 60 1320 70 1380 75L1440 80V0H1380C1320 0 1200 0 1080 0C960 0 840 0 720 0C600 0 480 0 360 0C240 0 120 0 60 0H0V50Z" fill="rgba(10, 15, 40, 0.6)" fill-opacity="0.5"/>
+            </svg>
+        </div>
+
+        <!-- Core Concepts Section -->
+        <section id="concepts" class="py-24 bg-[--color-bg-mid]">
+            <div class="container mx-auto px-6">
+                <div class="text-center mb-16 reveal">
+                    <h2 class="text-4xl md:text-5xl font-bold text-white section-title">The AI Trinity</h2>
+                    <p class="text-lg text-gray-400 mt-8 max-w-3xl mx-auto">Artificial Intelligence is a vast field. It's crucial to understand the relationship between its core components: AI, Machine Learning, and Deep Learning.</p>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                    <div class="glass-pane p-8 rounded-2xl gradient-border reveal"><h3 class="text-3xl font-bold gradient-text mb-4">Artificial Intelligence</h3><p class="text-gray-300">The broadest concept, encompassing any technique that enables computers to mimic human intelligence. This includes everything from rule-based systems (e.g., chess engines) and logic to complex statistical models.</p></div>
+                    <div class="glass-pane p-8 rounded-2xl gradient-border reveal" style="transition-delay: 200ms;"><h3 class="text-3xl font-bold gradient-text mb-4">Machine Learning</h3><p class="text-gray-300">A subset of AI. Instead of being explicitly programmed, ML algorithms learn patterns from data. They use statistical methods to improve their performance on a task over time. E.g., spam detection models learning from examples.</p></div>
+                    <div class="glass-pane p-8 rounded-2xl gradient-border reveal" style="transition-delay: 400ms;"><h3 class="text-3xl font-bold gradient-text mb-4">Deep Learning</h3><p class="text-gray-300">A specialized subset of Machine Learning that uses multi-layered Artificial Neural Networks to learn from vast amounts of data. This is the engine behind most modern AI breakthroughs, from image recognition to LLMs.</p></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Anatomy of a Neural Network Section -->
+        <section id="anatomy" class="py-24">
+            <div class="container mx-auto px-6">
+                 <div class="text-center mb-16 reveal">
+                    <h2 class="text-4xl md:text-5xl font-bold text-white section-title">Anatomy of a Neural Network</h2>
+                    <p class="text-lg text-gray-400 mt-8 max-w-3xl mx-auto">Deep learning models are built from interconnected layers of "neurons," mathematical units loosely inspired by the brain.</p>
+                </div>
+                <div class="glass-pane p-8 md:p-12 rounded-2xl reveal space-y-12">
+                    <div>
+                        <h3 class="text-3xl font-bold gradient-text mb-4">The Neuron (Perceptron)</h3>
+                        <p class="text-lg text-gray-300">The fundamental processing unit. It takes multiple numerical inputs, multiplies each by a "weight" (its importance), adds a "bias," and passes the sum through an activation function to produce an output. <br><code>Output = Activation(Σ(input * weight) + bias)</code></p>
+                    </div>
+                    <div>
+                        <h3 class="text-3xl font-bold gradient-text mb-4">Activation Functions: The Spark of Non-Linearity</h3>
+                        <p class="text-lg text-gray-300 mb-6">Without activation functions, a neural network could only learn linear relationships. These functions introduce non-linearity, allowing the network to learn incredibly complex patterns.</p>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
+                            <div><h4 class="text-xl font-bold text-white mb-2">Sigmoid</h4><p class="text-gray-400">Squashes values between 0 and 1. Historically used, but less common now.</p><img src="https://placehold.co/400x200/020412/e0e0e0?text=Sigmoid+Curve" class="mt-2 rounded-lg mx-auto" alt="Sigmoid Curve"></div>
+                            <div><h4 class="text-xl font-bold text-white mb-2">ReLU</h4><p class="text-gray-400">Outputs the input if positive, else outputs 0. Highly efficient and the most common choice.</p><img src="https://placehold.co/400x200/020412/e0e0e0?text=ReLU+Function" class="mt-2 rounded-lg mx-auto" alt="ReLU Function"></div>
+                            <div><h4 class="text-xl font-bold text-white mb-2">Tanh</h4><p class="text-gray-400">Squashes values between -1 and 1. A zero-centered alternative to Sigmoid.</p><img src="https://placehold.co/400x200/020412/e0e0e0?text=Tanh+Curve" class="mt-2 rounded-lg mx-auto" alt="Tanh Curve"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Backpropagation Section -->
+        <section id="backpropagation" class="py-24 bg-[--color-bg-mid]">
+            <div class="container mx-auto px-6">
+                <div class="text-center mb-16 reveal">
+                    <h2 class="text-4xl md:text-5xl font-bold text-white section-title">Training: The Art of Learning</h2>
+                    <p class="text-lg text-gray-400 mt-8 max-w-3xl mx-auto">A network learns through a process of trial and error, guided by backpropagation and gradient descent.</p>
+                </div>
+                <div class="glass-pane p-8 md:p-12 rounded-2xl grid md:grid-cols-2 gap-12 items-center reveal">
+                    <div>
+                        <h3 class="text-3xl font-bold gradient-text mb-4">Backpropagation & Gradient Descent</h3>
+                        <p class="text-lg text-gray-300 mb-4">This is the cycle of learning:</p>
+                        <ol class="list-decimal list-inside space-y-3 text-gray-300">
+                            <li><strong>Forward Pass:</strong> The network makes a prediction.</li>
+                            <li><strong>Calculate Loss:</strong> A loss function (e.g., Mean Squared Error) quantifies how wrong the prediction was.</li>
+                            <li><strong>Backward Pass (Backpropagation):</strong> The magic step. Calculus (the chain rule) is used to calculate the contribution of each weight to the final error. This is called the "gradient."</li>
+                            <li><strong>Update Weights (Gradient Descent):</strong> An "optimizer" (like Adam) adjusts the weights in the opposite direction of their gradient. This is like taking a small step downhill on a vast "error landscape," trying to find the lowest point. This cycle repeats millions of times.</li>
+                        </ol>
+                    </div>
+                    <div>
+                        <h3 class="text-3xl font-bold text-white mb-4 text-center">The Error Landscape</h3>
+                        <p class="text-center text-gray-400 mb-4">Imagine a vast, hilly terrain where altitude represents error. Gradient descent is the process of always taking a step in the steepest downward direction to find the bottom of the valley (minimum error).</p>
+                        <img src="https://placehold.co/600x400/0a0f28/e0e0e0?text=3D+Error+Landscape" alt="3D Error Landscape for Gradient Descent" class="rounded-lg">
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- LLMs Section -->
+        <section id="llms" class="py-24">
+             <div class="container mx-auto px-6">
+                <div class="text-center mb-16 reveal">
+                    <h2 class="text-4xl md:text-5xl font-bold text-white section-title">The Apex: LLMs & Transformers</h2>
+                    <p class="text-lg text-gray-400 mt-8 max-w-3xl mx-auto">Large Language Models are deep learning models trained on massive text datasets. Their power comes from the revolutionary Transformer architecture.</p>
+                </div>
+                <div class="glass-pane p-8 md:p-12 rounded-2xl reveal">
+                    <h3 class="text-3xl font-bold gradient-text mb-6 text-center">Inside the Transformer Architecture</h3>
+                    <div class="grid md:grid-cols-2 gap-8 text-lg">
+                        <div class="space-y-4">
+                           <p><strong class="text-white">1. Embeddings:</strong> Words are converted into high-dimensional vectors (lists of numbers) that capture their semantic meaning.</p>
+                           <p><strong class="text-white">2. Positional Encodings:</strong> Since Transformers process all words at once, these vectors are added to give the model information about the word's position in the sequence.</p>
+                        </div>
+                        <div class="space-y-4">
+                             <p><strong class="text-white">3. Multi-Head Self-Attention:</strong> The core mechanism. The model runs the "self-attention" process multiple times in parallel. Each "head" learns to focus on different types of relationships between words (e.g., grammatical, semantic), creating a rich contextual understanding.</p>
+                            <p><strong class="text-white">4. Feed-Forward Network:</strong> After attention, each word's representation passes through a standard neural network layer to add further processing depth.</p>
+                        </div>
+                    </div>
+                    <div class="text-center mt-8">
+                       <img src="https://placehold.co/800x450/0a0f28/e0e0e0?text=Transformer+Architecture+Diagram" alt="Diagram of the Transformer model architecture" class="rounded-lg mx-auto">
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Branches of AI Section -->
+        <section id="branches" class="py-24 bg-[--color-bg-mid]">
+            <div class="container mx-auto px-6">
+                <div class="text-center mb-16 reveal">
+                    <h2 class="text-4xl md:text-5xl font-bold text-white section-title">Branches of Artificial Intelligence</h2>
+                    <p class="text-lg text-gray-400 mt-8 max-w-3xl mx-auto">AI is not a monolith. It's a collection of specialized fields, each tackling unique problems.</p>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+                    <div class="glass-pane p-8 rounded-lg reveal gradient-border"><h3 class="text-2xl font-bold gradient-text mb-3">Computer Vision</h3><p>Granting machines the ability to "see" and interpret visual data. Applications: Object detection in self-driving cars, medical image analysis, facial recognition.</p></div>
+                    <div class="glass-pane p-8 rounded-lg reveal gradient-border"><h3 class="text-2xl font-bold gradient-text mb-3">Natural Language Processing (NLP)</h3><p>Enabling computers to understand, interpret, and generate human language. Applications: Chatbots, machine translation, sentiment analysis.</p></div>
+                    <div class="glass-pane p-8 rounded-lg reveal gradient-border"><h3 class="text-2xl font-bold gradient-text mb-3">Reinforcement Learning (RL)</h3><p>Training agents to make optimal decisions by rewarding or punishing their actions. Applications: Training game-playing AIs (AlphaGo), robotics control, optimizing logistics.</p></div>
+                    <div class="glass-pane p-8 rounded-lg reveal gradient-border"><h3 class="text-2xl font-bold gradient-text mb-3">Generative AI</h3><p>A class of models capable of creating new, original content. Applications: Generating realistic images (DALL-E), writing text (GPT-4), composing music.</p></div>
+                    <div class="glass-pane p-8 rounded-lg reveal gradient-border"><h3 class="text-2xl font-bold gradient-text mb-3">Graph Neural Networks (GNNs)</h3><p>Specialized networks designed to learn from data structured as graphs. Applications: Social network analysis, drug discovery, recommendation systems.</p></div>
+                    <div class="glass-pane p-8 rounded-lg reveal gradient-border"><h3 class="text-2xl font-bold gradient-text mb-3">Robotics</h3><p>Integrating AI perception, planning, and control with hardware to create machines that can perform tasks in the physical world. Applications: Warehouse automation, surgical robots.</p></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- AI Ethics Section -->
+        <section id="ethics" class="py-24">
+            <div class="container mx-auto px-6">
+                 <div class="text-center mb-16 reveal">
+                    <h2 class="text-4xl md:text-5xl font-bold text-white section-title">AI Ethics & Safety</h2>
+                    <p class="text-lg text-gray-400 mt-8 max-w-3xl mx-auto">With great power comes great responsibility. Developing advanced AI requires a deep commitment to safety, fairness, and transparency.</p>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                    <div class="glass-pane p-8 rounded-lg reveal"><h3 class="text-2xl font-bold gradient-text mb-3">Bias & Fairness</h3><p>AI models trained on biased historical data will inherit and amplify those biases. Ensuring fairness requires careful data curation and algorithmic auditing.</p></div>
+                    <div class="glass-pane p-8 rounded-lg reveal"><h3 class="text-2xl font-bold gradient-text mb-3">Explainability (XAI)</h3><p>The "black box" problem. As models become more complex, understanding *why* they make a certain decision is critical, especially in fields like medicine and finance.</p></div>
+                    <div class="glass-pane p-8 rounded-lg reveal"><h3 class="text-2xl font-bold gradient-text mb-3">Alignment & Control</h3><p>The challenge of ensuring that highly advanced AI systems understand and pursue goals that are truly aligned with human values, and that we can reliably control them.</p></div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="border-t border-cyan-500/20 py-8">
+         <div class="container mx-auto px-6 text-center text-gray-500">
+            <p>&copy; 2025 NeuralEngine. All rights reserved. An educational resource for exploring the frontiers of AI.</p>
+        </div>
+    </footer>
+
+    <script>
+        // --- Scroll Reveal Animation ---
+        const revealElements = document.querySelectorAll('.reveal');
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                }
+            });
+        }, { threshold: 0.1 });
+        revealElements.forEach(el => observer.observe(el));
+        
+        // --- Dynamic Particle Background (Three.js) ---
+        let scene, camera, renderer, particles;
+        function initBg() {
+            const canvas = document.getElementById('dynamic-bg');
+            if (!canvas) return;
+            
+            scene = new THREE.Scene();
+            camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+            camera.position.z = 5;
+            renderer = new THREE.WebGLRenderer({ canvas: canvas, alpha: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+
+            const particleCount = 5000;
+            const positions = new Float32Array(particleCount * 3);
+            for (let i = 0; i < particleCount * 3; i++) {
+                positions[i] = (Math.random() - 0.5) * 20;
+            }
+            const geometry = new THREE.BufferGeometry();
+            geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+            
+            const material = new THREE.PointsMaterial({
+                size: 0.02,
+                color: 0x00f2ff,
+                blending: THREE.AdditiveBlending,
+                transparent: true,
+                opacity: 0.7
+            });
+            particles = new THREE.Points(geometry, material);
+            scene.add(particles);
+
+            window.addEventListener('resize', onWindowResize);
+            document.addEventListener('mousemove', onMouseMove);
+            animateBg();
+        }
+
+        let mouseX = 0, mouseY = 0;
+        function onMouseMove(event) {
+            mouseX = (event.clientX / window.innerWidth) * 2 - 1;
+            mouseY = -(event.clientY / window.innerHeight) * 2 + 1;
+        }
+
+        function onWindowResize() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        }
+
+        const clock = new THREE.Clock();
+        function animateBg() {
+            requestAnimationFrame(animateBg);
+            const delta = clock.getDelta();
+            if (particles) {
+                particles.rotation.x += delta * 0.02;
+                particles.rotation.y += delta * 0.05;
+                camera.position.x += (mouseX * 0.5 - camera.position.x) * 0.05;
+                camera.position.y += (mouseY * 0.5 - camera.position.y) * 0.05;
+                camera.lookAt(scene.position);
+            }
+            renderer.render(scene, camera);
+        }
+
+        // --- 4D Hero Animation ---
+        // This will be a separate scene to avoid conflict
+        let heroScene, heroCamera, heroRenderer, tesseract;
+        function init4D() {
+            const container = document.getElementById('hero-canvas-container');
+            if (!container) return;
+            
+            heroScene = new THREE.Scene();
+            heroCamera = new THREE.PerspectiveCamera(75, container.clientWidth / container.clientHeight, 0.1, 1000);
+            heroCamera.position.z = 4;
+            heroRenderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+            heroRenderer.setSize(container.clientWidth, container.clientHeight);
+            container.appendChild(heroRenderer.domElement);
+
+            const points = [];
+            for (let i = 0; i < 16; i++) {
+                points.push(new THREE.Vector3((i & 1 ? 1 : -1), (i & 2 ? 1 : -1), (i & 4 ? 1 : -1)).multiplyScalar(1.5)); // Outer
+                points.push(new THREE.Vector3((i & 1 ? 1 : -1), (i & 2 ? 1 : -1), (i & 4 ? 1 : -1)).multiplyScalar(0.75)); // Inner
+            }
+            
+            const geometry = new THREE.BufferGeometry().setFromPoints(points);
+            const material = new THREE.PointsMaterial({ size: 0.1, map: createGradientTexture(), blending: THREE.AdditiveBlending, depthTest: false, transparent: true });
+            tesseract = new THREE.Points(geometry, material);
+            heroScene.add(tesseract);
+
+            const lineMaterial = new THREE.LineBasicMaterial({ transparent: true, opacity: 0.3, vertexColors: true });
+            const lineGeometry = new THREE.BufferGeometry();
+            const linePoints = [], lineColors = [];
+            const color1 = new THREE.Color(getComputedStyle(document.body).getPropertyValue('--color-primary'));
+            const color2 = new THREE.Color(getComputedStyle(document.body).getPropertyValue('--color-secondary'));
+            for(let i=0; i<8; i++){
+                linePoints.push(points[2*i], points[2*i+16]);
+                lineColors.push(color1.r, color1.g, color1.b, color2.r, color2.g, color2.b);
+            }
+            lineGeometry.setAttribute('position', new THREE.Float32BufferAttribute(linePoints.flatMap(p => p.toArray()), 3));
+            lineGeometry.setAttribute('color', new THREE.Float32BufferAttribute(lineColors, 3));
+            tesseract.add(new THREE.LineSegments(lineGeometry, lineMaterial));
+            
+            window.addEventListener('resize', onHeroResize);
+            container.addEventListener('mousemove', onHeroMouseMove);
+            animate4D();
+        }
+        
+        function createGradientTexture() {
+            const canvas = document.createElement('canvas'); canvas.width = 128; canvas.height = 128;
+            const context = canvas.getContext('2d');
+            const gradient = context.createRadialGradient(64, 64, 0, 64, 64, 64);
+            gradient.addColorStop(0, 'rgba(0, 242, 255, 1)');
+            gradient.addColorStop(0.2, 'rgba(255, 0, 242, 0.8)');
+            gradient.addColorStop(0.5, 'rgba(242, 255, 0, 0.4)');
+            gradient.addColorStop(1, 'rgba(0, 0, 0, 0)');
+            context.fillStyle = gradient;
+            context.fillRect(0, 0, 128, 128);
+            return new THREE.CanvasTexture(canvas);
+        }
+
+        function onHeroResize() {
+            const container = document.getElementById('hero-canvas-container');
+            if (container) {
+                heroCamera.aspect = container.clientWidth / container.clientHeight;
+                heroCamera.updateProjectionMatrix();
+                heroRenderer.setSize(container.clientWidth, container.clientHeight);
+            }
+        }
+        
+        let heroMouseX = 0, heroMouseY = 0;
+        function onHeroMouseMove(event) {
+            const container = document.getElementById('hero-canvas-container');
+            const rect = container.getBoundingClientRect();
+            heroMouseX = ((event.clientX - rect.left) / container.clientWidth) * 2 - 1;
+            heroMouseY = -((event.clientY - rect.top) / container.clientHeight) * 2 + 1;
+        }
+
+        const heroClock = new THREE.Clock();
+        function animate4D() {
+            requestAnimationFrame(animate4D);
+            const delta = heroClock.getDelta();
+            if (tesseract) {
+                tesseract.rotation.x += delta * (0.1 + heroMouseY * 0.1);
+                tesseract.rotation.y += delta * (0.15 + heroMouseX * 0.1);
+            }
+            if(heroRenderer && heroScene && heroCamera) {
+                heroRenderer.render(heroScene, heroCamera);
+            }
+        }
+        
+        window.onload = () => {
+            initBg();
+            init4D();
+        };
+    </script>
+</body>
+</html>
+
